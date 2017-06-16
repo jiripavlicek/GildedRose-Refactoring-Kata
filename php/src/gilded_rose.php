@@ -1,6 +1,7 @@
 <?php
 
-class GildedRose {
+class GildedRose
+{
 
     private $items;
 
@@ -11,31 +12,39 @@ class GildedRose {
 
     public function update_item($item)
     {
-        if ($item->name == 'Aged Brie') {
-            $item->increaseQuality();
-        } elseif ($item->name == 'Backstage passes to a TAFKAL80ETC concert') {
-            $item->increaseQuality();
-            if ($item->sell_in < 11) {
-                $item->increaseQuality();
-            }
-            if ($item->sell_in < 6) {
-                $item->increaseQuality();
-            }
-        } elseif ($item->name != 'Sulfuras, Hand of Ragnaros') {
-            $item->decreasequality();
-        }
-        if ($item->name != 'Sulfuras, Hand of Ragnaros') {
+        $this->repeatableUpdate($item, function ($item) {
+            $this->update1($item);
+        });
+        if ($item->name !== 'Sulfuras, Hand of Ragnaros') {
             $item->sell_in--;
-        }            
+        }
         if ($item->sell_in >= 0) {
             return;
         }
-        if ($item->name == 'Aged Brie') {
-            $item->increaseQuality();
-        } elseif ($item->name == 'Backstage passes to a TAFKAL80ETC concert') {
+        $this->repeatableUpdate($item, function ($item) {
             $item->quality = 0;
-        } elseif ($item->name != 'Sulfuras, Hand of Ragnaros') {
-            $item->decreaseQuality();
+        });
+    }
+
+    private function update1($item)
+    {
+        $item->increaseQuality();
+        if ($item->sell_in < 11) {
+            $item->increaseQuality();
+        }
+        if ($item->sell_in < 6) {
+            $item->increaseQuality();
+        }
+    }
+
+    private function repeatableUpdate($item, $greet)
+    {
+        if ($item->name === 'Aged Brie') {
+            $item->increaseQuality();
+        } elseif ($item->name === 'Backstage passes to a TAFKAL80ETC concert') {
+            $greet($item);
+        } elseif ($item->name !== 'Sulfuras, Hand of Ragnaros') {
+            $item->decreasequality();
         }
     }
 
@@ -53,13 +62,15 @@ class Item {
     public $sell_in;
     public $quality;
 
-    function __construct($name, $sell_in, $quality) {
+    public function __construct($name, $sell_in, $quality)
+    {
         $this->name = $name;
         $this->sell_in = $sell_in;
         $this->quality = $quality;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return "{$this->name}, {$this->sell_in}, {$this->quality}";
     }
 
@@ -75,4 +86,3 @@ class Item {
         $this->quality = max($this->quality, 0);
     }
 }
-
